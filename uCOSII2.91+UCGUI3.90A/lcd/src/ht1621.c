@@ -1,0 +1,863 @@
+//#include <stm32f10x_lib.h>
+#include "ht1621.h"
+#include "delay.h"
+#include "key.h"
+//#include "led.h"
+u8 num12345Seg[]={0x0F,0x0A,0x00,0x0A,0x0B,0x0C,0x09,0x0E,0x04,0x0E,0x0D,0x06,0x0F,0x06,0x08,0x0A,0x0F,0x0E,0x0D,0x0E};
+u8 num67Seg[]={0x0A,0x0F,0x0A,0x00,0x0C,0x0B,0x0E,0x09,0x0E,0x04,0x06,0x0D,0x06,0x0F,0x0A,0x08,0x0E,0x0F,0x0E,0x0D};
+u8 dotnum12345Seg[]={0x0F,0x0B,0x00,0x0B,0x0B,0x0D,0x09,0x0F,0x04,0x0F,0x0D,0x07,0x0F,0x07,0x08,0x0B,0x0F,0x0F,0x0D,0x0F};
+u8 dotnum67Seg[]={0x0B,0x0F,0x0B,0x00,0x0D,0x0B,0x0F,0x09,0x0F,0x04,0x07,0x0D,0x07,0x0F,0x0B,0x08,0x0F,0x0F,0x0F,0x0D};	   
+
+extern u8 auto_on;
+
+u8 flag_ABC=1;
+u8 ht1621_595=1;
+
+//////////////////////////////////////////////////////////////////////////////////	 
+//±æ≥Ã–ÚŒ™øÿ÷∆∆˜…Ëº∆£¨Œ¥æ≠–Ìø…£¨≤ªµ√∏¥÷∆Õ‚¥´
+// µ—È∞Â∂∞¥ÔµÁ◊”V3.0-1
+//LCD«˝∂ØHT1621¥˙¬Î PB3Œ™595RCLK;PB4Œ™1621WR;PB5Œ™1621CS;PB6Œ™1621DATA∫Õ595SCLK	   
+//–ﬁ∏ƒ»’∆⁄:2013/3/13
+//∞Ê±æ£∫V1.0
+//∞Ê»®À˘”–£¨µ¡∞Ê±ÿæø°£
+//Copyright(C) º√ƒ˛ –∂∞¥ÔµÁ◊”ø∆ºº”–œﬁπ´Àæ 2013-2023
+//All rights reserved									  
+//////////////////////////////////////////////////////////////////////////////////   
+
+//≥ı ºªØPB4 PB5∫ÕPB6Œ™ ‰≥ˆø⁄.≤¢ πƒ‹’‚PE ±÷”		    
+//HT1621 IO≥ı ºªØ
+void HT1621_Init(void)
+{		
+	/*RCC->APB2ENR|=1<<3;    // πƒ‹PORTB ±÷”
+											  
+
+      	GPIOB->CRH&=0XFFFFFF0F;
+	GPIOB->CRH|=0X00000030;//PB9
+
+	GPIOB->CRL&=0X000FFFFF;
+	GPIOB->CRL|=0X33300000;//PB 4 5 6Õ∆ÕÏ ‰≥ˆ
+
+	GPIOB->ODR|=1<<9;      //PB9 ‰≥ˆ∏ﬂ 
+	GPIOB->ODR|=1<<5;      //PB5 ‰≥ˆ∏ﬂ 
+	GPIOB->ODR|=1<<6;      //PB6 ‰≥ˆ∏ﬂ
+	GPIOB->ODR|=1<<7;      //PB7 ‰≥ˆ∏ﬂ 
+	*/
+  GPIO_InitTypeDef      GPIO_InitStructure;
+RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+  //GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+  GPIO_SetBits( GPIOB, GPIO_Pin_9);
+   GPIO_SetBits( GPIOB, GPIO_Pin_5);
+  GPIO_SetBits( GPIOB, GPIO_Pin_6);
+  GPIO_SetBits( GPIOB, GPIO_Pin_7);
+ 
+	SendCmd(LCDOFF);
+	SendCmd(BIAS);			
+	SendCmd(SYSEN);
+	SendCmd(LCDON);
+}
+
+void SendBit_1621(u8 data,u8 cnt)	 //data∏ﬂcntŒª–¥»ÎHT1621,∏ﬂŒª‘⁄«∞
+{
+  u8 i;
+  if(ht1621_595==1)
+{
+  	  	ht1621_595=0;
+  for(i=0;i<cnt;i++)
+  {
+   if((data&0x80)==0)DATA_0;
+   else DATA_1;
+   WR_0;
+   delay_us(1);
+   WR_1;
+      delay_us(1);
+   data<<=1;
+  }
+      	ht1621_595=1;
+}
+}
+void SendDataBit_1621(u8 data,u8 cnt)	 //dataµÕcntŒª–¥»ÎHT1621,µÕŒª‘⁄«∞
+{
+  u8 i;
+  if(ht1621_595==1)
+  	{
+  	  	ht1621_595=0;
+  for(i=0;i<cnt;i++)
+  {
+   if((data&0x01)==0)DATA_0;
+   else DATA_1;
+   WR_0;
+   delay_us(1);
+   WR_1;
+      delay_us(1);
+   data>>=1;
+  }
+     ht1621_595=1;
+
+  		}
+}
+
+void SendCmd(u8 command)
+{
+   CS_0;
+   SendBit_1621(0x80,3);
+   SendBit_1621(command,9);
+   CS_1;
+   
+}
+
+void Write_1621(u8 addr,u8 data)
+{
+//SendCmd(LCDOFF);
+	SendCmd(BIAS);			
+	SendCmd(SYSEN);
+	SendCmd(LCDON);
+   CS_0;
+   SendBit_1621(0xa0,3);
+   SendBit_1621(addr<<2,6);
+   SendDataBit_1621(data,4);
+   CS_1;
+}
+
+void WriteAll_1621(u8 addr,u8 *p,u8 cnt)
+{
+   u8 i;
+//  SendCmd(LCDOFF);
+	SendCmd(BIAS);			
+	SendCmd(SYSEN);
+	SendCmd(LCDON);
+   CS_0;
+   SendBit_1621(0xa0,3);
+   SendBit_1621(addr<<2,6);
+   for(i=0;i<cnt;i++,p++)
+   {
+   	   SendDataBit_1621(*p,4);
+   }
+   CS_1;
+}
+
+void Clera_lcd(void)
+{
+	 u8 t;
+	// SendCmd(LCDOFF);
+	SendCmd(BIAS);			
+	SendCmd(SYSEN);
+	SendCmd(LCDON);
+	 for(t=0;t<22;t++)
+	 {
+	   u8 i;
+	   for(i=0;i<4;i++)
+	   {		  
+	   	Write_1621(t,0x00<<i);
+	   }
+	 }
+}
+
+/*
+void Graf_con_u(u8 cos,u16 volt)
+{
+	u8 temp,coszhengshu,cosshifen,cosbaifen;
+	u16 voltbaiwei,voltshiwei,voltgewei;
+
+	Write_1621(11,0x01);   //œ‘ æU(v)
+	Write_1621(13,0x01);   //œ‘ æcos
+	Write_1621(14,0x08);   //œ‘ ædot.
+	Write_1621(17,0x08);   //œ‘ æauto
+	
+	temp=cos;
+if( L_C_flag_A==1)
+{
+	coszhengshu=temp/100;
+	WriteAll_1621(15,num1237Seg+2*coszhengshu,2);	//œ‘ æcos’˚ ˝≤ø∑÷
+}
+if( L_C_flag_A==0)
+
+{
+	Write_1621(16,0x02);	//œ‘ æcos’˚ ˝≤ø∑÷
+}
+	cosshifen=(temp%100)/10;
+	WriteAll_1621(19,num1237Seg+2*cosshifen,2);	 	//œ‘ æcos Æ∑÷Œª≤ø∑÷
+
+	cosbaifen=(temp%10)%10;
+	WriteAll_1621(17,num1237Seg+2*cosbaifen,2);	   //œ‘ æcos∞Ÿ∑÷Œª≤ø∑÷
+
+	voltbaiwei=volt/100;
+	WriteAll_1621(2,num456Seg+2*voltbaiwei,2);	  //œ‘ ævolt∞ŸŒª≤ø∑÷
+
+	voltshiwei=(volt%100)/10;
+	WriteAll_1621(5,num456Seg+2*voltshiwei,2);	  //œ‘ ævolt ÆŒª≤ø∑÷
+
+	voltgewei=volt%10;
+	WriteAll_1621(8,num1237Seg+2*voltgewei,2);	  //œ‘ ævolt∏ˆŒª≤ø∑÷
+
+}
+*/
+
+void Graf_con_u(u8 cos,u16 volt,u8 L_C)
+{
+	u8 temp,coszhengshu,cosshifen,cosbaifen;
+	u16 voltbaiwei,voltshiwei,voltgewei;
+
+		Write_1621(12,0x04);   //œ‘ æU(v)
+	Write_1621(14,0x01);   //œ‘ æcos
+	Write_1621(17,0x01);   //œ‘ ædot.
+	Write_1621(15,0x01);   //logo
+	   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+
+	if(flag_ABC==1)
+		{
+	Write_1621(4,0x04);   //œ‘ æ «∞A
+	Write_1621(7,0x01);   //œ‘ æ∫ÛA
+   }	
+	if(flag_ABC==2)
+		{
+	Write_1621(4,0x02);   //œ‘ æ «∞B
+       Write_1621(7,0x02);   //œ‘ æ∫ÛB
+   }	
+		if(flag_ABC==3)
+		{
+	Write_1621(4,0x01);   //œ‘ æ «∞C
+	 Write_1621(7,0x04);   //œ‘ æ∫ÛC
+   }	
+	temp=cos;
+		{
+if( L_C==1)
+{
+	coszhengshu=temp/100;
+	WriteAll_1621(16,dotnum12345Seg+2*coszhengshu,2);	//œ‘ æcos’˚ ˝≤ø∑÷
+
+}
+if( L_C==0)
+
+{
+	//Write_1621(17,0x04);	//œ‘ æcos’˚ ˝≤ø∑÷
+		Write_1621(17,0x05);   //œ‘ ædot.
+
+}
+	cosshifen=(temp%100)/10;
+	WriteAll_1621(18,num12345Seg+2*cosshifen,2);	 	//œ‘ æcos Æ∑÷Œª≤ø∑÷
+
+	cosbaifen=(temp%10)%10;
+	WriteAll_1621(20,num12345Seg+2*cosbaifen,2);	   //œ‘ æcos∞Ÿ∑÷Œª≤ø∑÷
+	
+
+
+	voltbaiwei=volt/100;
+	WriteAll_1621(2,num12345Seg+2*voltbaiwei,2);	  //œ‘ ævolt∞ŸŒª≤ø∑÷
+
+	
+	voltshiwei=(volt%100)/10;
+	WriteAll_1621(10,num67Seg+2*voltshiwei,2);	  //œ‘ ævolt ÆŒª≤ø∑÷
+
+	voltgewei=volt%10;
+	WriteAll_1621(8,num67Seg+2*voltgewei,2);	  //œ‘ ævolt∏ˆŒª≤ø∑÷
+
+		}
+		
+}
+void Graf_cuirrent(u32 current)
+{
+   u32 temp;
+   u16 currshiwei,currgewei,currshifenwei,currbaifenwei,currqianfenwei;
+
+	Write_1621(12,0x01);	//œ‘ æC-I(A)
+   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+	Write_1621(15,0x01);   //logo
+	if(flag_ABC==1)
+		{
+	Write_1621(4,0x04);   //œ‘ æ «∞A
+   }	
+	if(flag_ABC==2)
+		{
+	Write_1621(4,0x02);   //œ‘ æ «∞B
+   }	
+		if(flag_ABC==3)
+		{
+	Write_1621(4,0x01);   //œ‘ æ «∞C
+   }	
+   temp=current;
+
+   currshiwei=temp/10000;
+   WriteAll_1621(16,num12345Seg+2*currshiwei,2);	//œ‘ æC-I(A)’˚ ˝≤ø∑÷ ÆŒª
+
+   currgewei=(temp%10000)/1000;
+   WriteAll_1621(18,num12345Seg+2*currgewei,2);	//œ‘ æC-I(A)’˚ ˝≤ø∑÷∏ˆŒª
+
+   currshifenwei=(temp%1000)/100;
+   WriteAll_1621(20,num12345Seg+2*currshifenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷ Æ∑÷Œª
+
+   currbaifenwei=(temp%100)/10;
+   WriteAll_1621(0,num12345Seg+2*currbaifenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷∞Ÿ∑÷Œª
+
+   currqianfenwei=temp%10;
+   WriteAll_1621(2,num12345Seg+2*currqianfenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷«ß∑÷Œª
+
+}
+
+
+void Graf_C_cuirrent(u32 current)
+{
+   u32 temp;
+   u16 currshiwei,currgewei,currshifenwei,currbaifenwei,currqianfenwei;
+
+	Write_1621(12,0x01);	//œ‘ æC-I(A)
+   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+	Write_1621(15,0x01);   //logo
+	 Write_1621(7,0x04);   //œ‘ æ∫ÛC
+	
+	if(flag_ABC==1)
+		{
+	Write_1621(4,0x04);   //œ‘ æ «∞A
+   }	
+	if(flag_ABC==2)
+		{
+	Write_1621(4,0x02);   //œ‘ æ «∞B
+   }	
+		if(flag_ABC==3)
+		{
+	Write_1621(4,0x01);   //œ‘ æ «∞C
+   }	
+   temp=current;
+
+   currshiwei=temp/10000;
+   WriteAll_1621(16,num12345Seg+2*currshiwei,2);	//œ‘ æC-I(A)’˚ ˝≤ø∑÷ ÆŒª
+
+   currgewei=(temp%10000)/1000;
+   WriteAll_1621(18,num12345Seg+2*currgewei,2);	//œ‘ æC-I(A)’˚ ˝≤ø∑÷∏ˆŒª
+
+   currshifenwei=(temp%1000)/100;
+   WriteAll_1621(20,num12345Seg+2*currshifenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷ Æ∑÷Œª
+
+   currbaifenwei=(temp%100)/10;
+   WriteAll_1621(0,num12345Seg+2*currbaifenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷∞Ÿ∑÷Œª
+
+   currqianfenwei=temp%10;
+   WriteAll_1621(2,num12345Seg+2*currqianfenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷«ß∑÷Œª
+
+}
+
+
+void Graf_qkvar(u16 qkvar)
+{
+   u32 temp;
+   u16 qkvarshiwei,qkvargewei,qkvarshifenwei,qkvarbaifenwei,qkvarqianfenwei;
+
+	Write_1621(15,0x05);	//œ‘ æQ(Kvar),logo
+   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+	if(flag_ABC==1)
+		{
+	Write_1621(7,0x01);   //œ‘ æ∫ÛA
+   }	
+	if(flag_ABC==2)
+		{
+       Write_1621(7,0x02);   //œ‘ æ∫ÛB
+   }	
+		if(flag_ABC==3)
+		{
+	 Write_1621(7,0x04);   //œ‘ æ∫ÛC
+   }	
+   temp=qkvar;
+
+   qkvarshiwei=temp/10000;
+   WriteAll_1621(20,num12345Seg+2*qkvarshiwei,2);	//œ‘ æQ(Kvar)’˚ ˝≤ø∑÷ ÆŒª
+
+   qkvargewei=(temp%10000)/1000;
+   WriteAll_1621(0,num12345Seg+2*qkvargewei,2);	//œ‘ æQ(Kvar)’˚ ˝≤ø∑÷∏ˆŒª
+
+   qkvarshifenwei=(temp%1000)/100;
+   WriteAll_1621(2,num12345Seg+2*qkvarshifenwei,2);	//œ‘ æQ(Kvar)–° ˝≤ø∑÷ Æ∑÷Œª
+
+   qkvarbaifenwei=(temp%100)/10;
+   WriteAll_1621(10,num67Seg+2*qkvarbaifenwei,2);	//œ‘ æQ(Kvar)–° ˝≤ø∑÷∞Ÿ∑÷Œª
+
+   qkvarqianfenwei=temp%10;
+   WriteAll_1621(8,num67Seg+2*qkvarqianfenwei,2);	//œ‘ æQ(Kvar)–° ˝≤ø∑÷«ß∑÷Œª
+
+}
+
+void Graf_temp(u8 temp)
+{
+	u8 tempbaiwei,tempshiwei,tempgewei;
+
+	Write_1621(14,0x04);	//œ‘ æTEMP
+	   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+	Write_1621(15,0x01);   //logo
+
+	tempbaiwei=temp/100;
+	WriteAll_1621(2,num12345Seg+2*tempbaiwei,2);	//œ‘ æTEMP∞Ÿ ˝Œª
+
+	tempshiwei=(temp%100)/10;
+	WriteAll_1621(10,num67Seg+2*tempshiwei,2);	//œ‘ æTEMP Æ ˝Œª
+
+	tempgewei=temp%10;
+	WriteAll_1621(8,num67Seg+2*tempgewei,2);	//œ‘ æTEMP∏ˆ ˝Œª
+
+}
+
+void Graf_temp_double(u8 temp_1,u8 temp_2)
+{
+	u8 tempbaiwei,tempshiwei,tempgewei;
+
+	Write_1621(14,0x04);	//œ‘ æTEMP  T1
+	Write_1621(12,0x08);	//œ‘ æTEMP  T2
+	
+	   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+	Write_1621(15,0x01);   //logo
+
+tempbaiwei=temp_1/100;
+	WriteAll_1621(16,num12345Seg+2*tempbaiwei,2);	//œ‘ æTEMP∞Ÿ ˝Œª
+
+	tempshiwei=(temp_1%100)/10;
+	WriteAll_1621(18,num12345Seg+2*tempshiwei,2);	//œ‘ æTEMP Æ ˝Œª
+
+	tempgewei=temp_1%10;
+	WriteAll_1621(20,num12345Seg+2*tempgewei,2);	//œ‘ æTEMP∏ˆ ˝Œ
+
+
+
+	tempbaiwei=temp_2/100;
+	WriteAll_1621(2,num12345Seg+2*tempbaiwei,2);	//œ‘ æTEMP∞Ÿ ˝Œª
+
+	tempshiwei=(temp_2%100)/10;
+	WriteAll_1621(10,num67Seg+2*tempshiwei,2);	//œ‘ æTEMP Æ ˝Œª
+
+	tempgewei=temp_2%10;
+	WriteAll_1621(8,num67Seg+2*tempgewei,2);	//œ‘ æTEMP∏ˆ ˝Œª
+
+}
+
+void Graf_id(u8 hostguest,u8 id)
+{
+	u8 h_gbaiwei,h_gshiwei,h_ggewei,idbaiwei,idshiwei,idgewei;
+
+	Write_1621(7,0x08);	//œ‘ æID
+	   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+	Write_1621(15,0x01);   //logo
+
+	h_gbaiwei=hostguest/100;
+	WriteAll_1621(16,num12345Seg+2*h_gbaiwei,2);	//œ‘ æª˙∫≈∞ŸŒª ˝
+
+	h_gshiwei=(hostguest%100)/10;
+	WriteAll_1621(18,num12345Seg+2*h_gshiwei,2);	//œ‘ æª˙∫≈ ÆŒª ˝
+
+	h_ggewei=hostguest%10;
+	WriteAll_1621(20,num12345Seg+2*h_ggewei,2);	//œ‘ æª˙∫≈∏ˆŒª ˝
+
+	idbaiwei=id/100;
+	WriteAll_1621(2,num12345Seg+2*idbaiwei,2);	//œ‘ æID∞Ÿ ˝Œª
+
+	idshiwei=(id%100)/10;
+	WriteAll_1621(10,num67Seg+2*idshiwei,2);	//œ‘ æID Æ ˝Œª
+
+	idgewei=id%10;
+	WriteAll_1621(8,num67Seg+2*idgewei,2);	//œ‘ æID∏ˆ ˝Œª
+
+}
+
+void Graf_ver(u8 ver)
+{
+   u8 verbaiwei,vershiwei,vergewei;
+   
+   //Write_1621(4,0x04);	//œ‘ ædot10.
+   Write_1621(13,0x08);	//œ‘ æver
+   if(auto_on==1)
+   Write_1621(6,0x01);	//œ‘ æauto
+   if(auto_on==0)
+   	   Write_1621(5,0x01);	//œ‘ æhand
+	Write_1621(15,0x01);   //logo
+
+   verbaiwei=ver/100;
+   WriteAll_1621(2,num12345Seg+2*verbaiwei,2);	//œ‘ æVER∞Ÿ ˝Œª
+
+   vershiwei=(ver%100)/10;
+   WriteAll_1621(10,num67Seg+2*vershiwei,2);	//œ‘ æVER Æ ˝Œª
+
+   vergewei=ver%10;
+   WriteAll_1621(8,num67Seg+2*vergewei,2);	//œ‘ æVER∏ˆ ˝Œª
+}
+
+void Graf_setid(u8 idnum)
+{   
+   u8 idnumbaiwei,idnumshiwei,idnumgewei;
+  
+   Write_1621(6,0x08);	//œ‘ æset
+   Write_1621(7,0x08);	//œ‘ æID
+   	Write_1621(15,0x01);   //logo
+
+   idnumbaiwei=idnum/100;
+   WriteAll_1621(2,num12345Seg+2*idnumbaiwei,2);	//œ‘ æidnum∞Ÿ ˝Œª
+
+   idnumshiwei=(idnum%100)/10;
+   WriteAll_1621(10,num67Seg+2*idnumshiwei,2);	//œ‘ æidnum Æ ˝Œª
+
+   idnumgewei=idnum%10;
+   WriteAll_1621(8,num67Seg+2*idnumgewei,2);	//œ‘ æidnum∏ˆ ˝Œª
+
+}
+
+
+void HT595_Send_Byte(u8 state)
+{                        
+    u8 t; 
+	if(ht1621_595==1)
+		{
+		ht1621_595=0;
+	
+		RCLK_595_0;		    
+    for(t=0;t<8;t++)
+    {    
+		DATA_0;          
+        if((state&0x80)==0)
+		WR_0;
+		else WR_1;
+		delay_us(3);
+		DATA_1;
+        state<<=1; 	  
+
+    }
+
+	delay_us(10);
+	RCLK_595_1;
+	ht1621_595=1;
+	
+    	}
+	
+}
+
+
+
+
+
+/**********************************************************************************************************/
+/*
+//#include <stm32f10x_lib.h>
+#include "ht1621.h"
+#include "delay.h"
+#include "key.h"
+
+u8 num456Seg[]={0x0d,0x07,0x00,0x06,0x0e,0x03,0x0a,0x07,0x03,0x06,0x0b,0x05,0x0f,0x05,0x00,0x07,0x0f,0x07,0x0b,0x07 };
+u8 num1237Seg[]={0x07,0x0d,0x06,0x00,0x03,0x0e,0x07,0x0a,0x06,0x03,0x05,0x0b,0x05,0x0f,0x07,0x00,0x07,0x0f,0x07,0x0b};
+extern u8 L_C_flag_A;//∏––‘»›–‘±Í◊º±‰¡ø
+
+
+void HT1621_Init(void)
+{		
+	
+  GPIO_InitTypeDef      GPIO_InitStructure;
+RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+//RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  	 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+  //GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+  GPIO_SetBits( GPIOB, GPIO_Pin_9);
+   GPIO_SetBits( GPIOB, GPIO_Pin_5);
+  GPIO_SetBits( GPIOB, GPIO_Pin_6);
+  GPIO_SetBits( GPIOB, GPIO_Pin_7);
+ 
+	SendCmd(LCDOFF);
+	SendCmd(BIAS);			
+	SendCmd(SYSEN);
+	SendCmd(LCDON);
+}
+
+void SendBit_1621(u8 data,u8 cnt)	 //data∏ﬂcntŒª–¥»ÎHT1621,∏ﬂŒª‘⁄«∞
+{
+  u8 i;
+  for(i=0;i<cnt;i++)
+  {
+   if((data&0x80)==0)DATA_0;
+   else DATA_1;
+   WR_0;
+   delay_us(1);
+   WR_1;
+      delay_us(1);
+   data<<=1;
+  }
+}
+void SendDataBit_1621(u8 data,u8 cnt)	 //dataµÕcntŒª–¥»ÎHT1621,µÕŒª‘⁄«∞
+{
+  u8 i;
+  for(i=0;i<cnt;i++)
+  {
+   if((data&0x01)==0)DATA_0;
+   else DATA_1;
+   WR_0;
+   delay_us(1);
+   WR_1;
+      delay_us(1);
+   data>>=1;
+  }
+}
+
+void SendCmd(u8 command)
+{
+   CS_0;
+   SendBit_1621(0x80,3);
+   SendBit_1621(command,9);
+   CS_1;
+   
+}
+
+void Write_1621(u8 addr,u8 data)
+{
+   CS_0;
+   SendBit_1621(0xa0,3);
+   SendBit_1621(addr<<2,6);
+   SendDataBit_1621(data,4);
+   CS_1;
+}
+
+void WriteAll_1621(u8 addr,u8 *p,u8 cnt)
+{
+   u8 i;
+   CS_0;
+   SendBit_1621(0xa0,3);
+   SendBit_1621(addr<<2,6);
+   for(i=0;i<cnt;i++,p++)
+   {
+   	   SendDataBit_1621(*p,4);
+   }
+   CS_1;
+}
+
+void Clera_lcd(void)
+{
+	 u8 t;
+	 for(t=0;t<22;t++)
+	 {
+	   u8 i;
+	   for(i=0;i<4;i++)
+	   {		  
+	   	Write_1621(t,0x00<<i);
+	   }
+	 }
+}
+
+void Graf_con_u(u8 cos,u16 volt)
+{
+	u8 temp,coszhengshu,cosshifen,cosbaifen;
+	u16 voltbaiwei,voltshiwei,voltgewei;
+
+	Write_1621(11,0x01);   //œ‘ æU(v)
+	Write_1621(13,0x01);   //œ‘ æcos
+	Write_1621(14,0x08);   //œ‘ ædot.
+	Write_1621(17,0x08);   //œ‘ æauto
+	
+	temp=cos;
+if( L_C_flag_A==1)
+{
+	coszhengshu=temp/100;
+	WriteAll_1621(15,num1237Seg+2*coszhengshu,2);	//œ‘ æcos’˚ ˝≤ø∑÷
+}
+if( L_C_flag_A==0)
+
+{
+	Write_1621(16,0x02);	//œ‘ æcos’˚ ˝≤ø∑÷
+}
+	cosshifen=(temp%100)/10;
+	WriteAll_1621(19,num1237Seg+2*cosshifen,2);	 	//œ‘ æcos Æ∑÷Œª≤ø∑÷
+
+	cosbaifen=(temp%10)%10;
+	WriteAll_1621(17,num1237Seg+2*cosbaifen,2);	   //œ‘ æcos∞Ÿ∑÷Œª≤ø∑÷
+
+	voltbaiwei=volt/100;
+	WriteAll_1621(2,num456Seg+2*voltbaiwei,2);	  //œ‘ ævolt∞ŸŒª≤ø∑÷
+
+	voltshiwei=(volt%100)/10;
+	WriteAll_1621(5,num456Seg+2*voltshiwei,2);	  //œ‘ ævolt ÆŒª≤ø∑÷
+
+	voltgewei=volt%10;
+	WriteAll_1621(8,num1237Seg+2*voltgewei,2);	  //œ‘ ævolt∏ˆŒª≤ø∑÷
+
+}
+
+void Graf_cuirrent(u32 current)
+{
+   u32 temp;
+   u16 currshiwei,currgewei,currshifenwei,currbaifenwei,currqianfenwei;
+
+	Write_1621(12,0x01);	//œ‘ æC-I(A)
+//	Write_1621(13,0x08);	//œ‘ ædot4 .
+	Write_1621(17,0x08);	//œ‘ æauto
+
+   temp=current;
+
+   currshiwei=temp/10000;
+   WriteAll_1621(15,num1237Seg+2*currshiwei,2);	//œ‘ æC-I(A)’˚ ˝≤ø∑÷ ÆŒª
+
+   currgewei=(temp%10000)/1000;
+   WriteAll_1621(19,num1237Seg+2*currgewei,2);	//œ‘ æC-I(A)’˚ ˝≤ø∑÷∏ˆŒª
+
+   currshifenwei=(temp%1000)/100;
+   WriteAll_1621(17,num1237Seg+2*currshifenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷ Æ∑÷Œª
+
+   currbaifenwei=(temp%100)/10;
+   WriteAll_1621(0,num456Seg+2*currbaifenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷∞Ÿ∑÷Œª
+
+   currqianfenwei=temp%10;
+   WriteAll_1621(2,num456Seg+2*currqianfenwei,2);	//œ‘ æC-I(A)–° ˝≤ø∑÷«ß∑÷Œª
+
+}
+
+void Graf_qkvar(u16 qkvar)
+{
+   u32 temp;
+   u16 qkvarshiwei,qkvargewei,qkvarshifenwei,qkvarbaifenwei,qkvarqianfenwei;
+
+	Write_1621(10,0x01);	//œ‘ æQ(Kvar)
+//	Write_1621(11,0x08);	//œ‘ ædot8 .
+	Write_1621(17,0x08);	//œ‘ æauto
+
+   temp=qkvar;
+
+   qkvarshiwei=temp/10000;
+   WriteAll_1621(17,num1237Seg+2*qkvarshiwei,2);	//œ‘ æQ(Kvar)’˚ ˝≤ø∑÷ ÆŒª
+
+   qkvargewei=(temp%10000)/1000;
+   WriteAll_1621(0,num456Seg+2*qkvargewei,2);	//œ‘ æQ(Kvar)’˚ ˝≤ø∑÷∏ˆŒª
+
+   qkvarshifenwei=(temp%1000)/100;
+   WriteAll_1621(2,num456Seg+2*qkvarshifenwei,2);	//œ‘ æQ(Kvar)–° ˝≤ø∑÷ Æ∑÷Œª
+
+   qkvarbaifenwei=(temp%100)/10;
+   WriteAll_1621(5,num456Seg+2*qkvarbaifenwei,2);	//œ‘ æQ(Kvar)–° ˝≤ø∑÷∞Ÿ∑÷Œª
+
+   qkvarqianfenwei=temp%10;
+   WriteAll_1621(8,num1237Seg+2*qkvarqianfenwei,2);	//œ‘ æQ(Kvar)–° ˝≤ø∑÷«ß∑÷Œª
+
+}
+
+void Graf_temp(u8 temp)
+{
+	u8 tempbaiwei,tempshiwei,tempgewei;
+
+	Write_1621(4,0x01);	//œ‘ æTEMP
+	Write_1621(17,0x08);	//œ‘ æauto
+
+	tempbaiwei=temp/100;
+	WriteAll_1621(2,num456Seg+2*tempbaiwei,2);	//œ‘ æTEMP∞Ÿ ˝Œª
+
+	tempshiwei=(temp%100)/10;
+	WriteAll_1621(5,num456Seg+2*tempshiwei,2);	//œ‘ æTEMP Æ ˝Œª
+
+	tempgewei=temp%10;
+	WriteAll_1621(8,num1237Seg+2*tempgewei,2);	//œ‘ æTEMP∏ˆ ˝Œª
+
+}
+
+void Graf_id(u8 hostguest,u8 id)
+{
+	u8 h_gbaiwei,h_gshiwei,h_ggewei,idbaiwei,idshiwei,idgewei;
+
+	Write_1621(7,0x04);	//œ‘ æID
+	Write_1621(17,0x08);	//œ‘ æauto
+
+	h_gbaiwei=hostguest/100;
+	WriteAll_1621(15,num1237Seg+2*h_gbaiwei,2);	//œ‘ æª˙∫≈∞ŸŒª ˝
+
+	h_gshiwei=(hostguest%100)/10;
+	WriteAll_1621(19,num1237Seg+2*h_gshiwei,2);	//œ‘ æª˙∫≈ ÆŒª ˝
+
+	h_ggewei=hostguest%10;
+	WriteAll_1621(17,num1237Seg+2*h_ggewei,2);	//œ‘ æª˙∫≈∏ˆŒª ˝
+
+	idbaiwei=id/100;
+	WriteAll_1621(2,num456Seg+2*idbaiwei,2);	//œ‘ æID∞Ÿ ˝Œª
+
+	idshiwei=(id%100)/10;
+	WriteAll_1621(5,num456Seg+2*idshiwei,2);	//œ‘ æID Æ ˝Œª
+
+	idgewei=id%10;
+	WriteAll_1621(8,num1237Seg+2*idgewei,2);	//œ‘ æID∏ˆ ˝Œª
+
+}
+
+void Graf_ver(u8 ver)
+{
+   u8 verbaiwei,vershiwei,vergewei;
+   
+   Write_1621(4,0x04);	//œ‘ ædot10.
+   Write_1621(10,0x02);	//œ‘ æver
+   Write_1621(17,0x08);	//œ‘ æauto
+
+   verbaiwei=ver/100;
+   WriteAll_1621(2,num456Seg+2*verbaiwei,2);	//œ‘ æVER∞Ÿ ˝Œª
+
+   vershiwei=(ver%100)/10;
+   WriteAll_1621(5,num456Seg+2*vershiwei,2);	//œ‘ æVER Æ ˝Œª
+
+   vergewei=ver%10;
+   WriteAll_1621(8,num1237Seg+2*vergewei,2);	//œ‘ æVER∏ˆ ˝Œª
+}
+
+void Graf_setid(u8 idnum)
+{   
+   u8 idnumbaiwei,idnumshiwei,idnumgewei;
+  
+   Write_1621(1,0x08);	//œ‘ æset
+   Write_1621(7,0x04);	//œ‘ æID
+   
+   idnumbaiwei=idnum/100;
+   WriteAll_1621(2,num456Seg+2*idnumbaiwei,2);	//œ‘ æidnum∞Ÿ ˝Œª
+
+   idnumshiwei=(idnum%100)/10;
+   WriteAll_1621(5,num456Seg+2*idnumshiwei,2);	//œ‘ æidnum Æ ˝Œª
+
+   idnumgewei=idnum%10;
+   WriteAll_1621(8,num1237Seg+2*idnumgewei,2);	//œ‘ æidnum∏ˆ ˝Œª
+
+}
+
+void HT595_Send_Byte(u8 state)
+{                        
+    u8 t; 
+		RCLK_595_0;		    
+    for(t=0;t<8;t++)
+    {    
+		DATA_0;          
+        if((state&0x80)==0)
+		WR_0;
+		else WR_1;
+		delay_us(3);
+		DATA_1;
+        state<<=1; 	  
+
+    }
+
+	delay_us(10);
+	RCLK_595_1;
+}
+
+*/
+

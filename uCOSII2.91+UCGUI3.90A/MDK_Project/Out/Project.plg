@@ -1,0 +1,141 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\Administrator\Documents\GitHub\double_fenbu\uCOSII2.91+UCGUI3.90A\MDK_Project\Project.uvproj
+Project File Date:  11/29/2013
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling main.c...
+..\User\main.c(1712): warning:  #177-D: variable "sine_A" was declared but never referenced
+..\User\main.c(1713): warning:  #177-D: variable "sine_B" was declared but never referenced
+..\User\main.c(1714): warning:  #177-D: variable "sine_C" was declared but never referenced
+..\User\main.c(2955): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3094): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3238): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3500): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3632): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3763): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(2676): warning:  #177-D: variable "s" was declared but never referenced
+..\User\main.c(2677): warning:  #550-D: variable "status" was set but never used
+..\User\main.c(2700): warning:  #550-D: variable "wugongkvar_95" was set but never used
+..\User\main.c(5591): warning:  #177-D: variable "warning_flag" was declared but never referenced
+compiling uctsk_Task.c...
+compiling uctsk_OSView.c...
+compiling stm32f4xx_it.c...
+compiling os_cpu_c.c...
+compiling OS_AppHooks.c...
+compiling os_view.c...
+compiling os_viewc.c...
+compiling GUI_X_uCOS.c...
+compiling GUI_X_Touch.c...
+compiling delay.c...
+compiling ht1621.c...
+compiling key.c...
+linking...
+Program Size: Code=48904 RO-data=27000 RW-data=380 ZI-data=50108  
+FromELF: creating hex file...
+".\Out\Project.axf" - 0 Error(s), 13 Warning(s).
+Build target 'Target 1'
+compiling main.c...
+..\User\main.c(1122): warning:  #940-D: missing return statement at end of non-void function "ADC_Temperature"
+..\User\main.c(1787): error:  #20: identifier "tempshuzhi" is undefined
+..\User\main.c(1724): warning:  #177-D: variable "sine_A" was declared but never referenced
+..\User\main.c(1725): warning:  #177-D: variable "sine_B" was declared but never referenced
+..\User\main.c(1726): warning:  #177-D: variable "sine_C" was declared but never referenced
+..\User\main.c(2967): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3106): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3250): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3512): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3644): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3775): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(2688): warning:  #177-D: variable "s" was declared but never referenced
+..\User\main.c(2689): warning:  #550-D: variable "status" was set but never used
+..\User\main.c(2712): warning:  #550-D: variable "wugongkvar_95" was set but never used
+..\User\main.c(5605): warning:  #177-D: variable "warning_flag" was declared but never referenced
+compiling key.c...
+Target not created
+Build target 'Target 1'
+compiling main.c...
+..\User\main.c(1122): warning:  #940-D: missing return statement at end of non-void function "ADC_Temperature"
+..\User\main.c(1787): error:  #20: identifier "tempshuzhi" is undefined
+..\User\main.c(1724): warning:  #177-D: variable "sine_A" was declared but never referenced
+..\User\main.c(1725): warning:  #177-D: variable "sine_B" was declared but never referenced
+..\User\main.c(1726): warning:  #177-D: variable "sine_C" was declared but never referenced
+..\User\main.c(2967): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3106): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3250): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3512): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3644): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3775): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(2688): warning:  #177-D: variable "s" was declared but never referenced
+..\User\main.c(2689): warning:  #550-D: variable "status" was set but never used
+..\User\main.c(2712): warning:  #550-D: variable "wugongkvar_95" was set but never used
+..\User\main.c(5605): warning:  #177-D: variable "warning_flag" was declared but never referenced
+Target not created
+Build target 'Target 1'
+compiling main.c...
+..\User\main.c(1122): warning:  #940-D: missing return statement at end of non-void function "ADC_Temperature"
+..\User\main.c(1724): warning:  #177-D: variable "sine_A" was declared but never referenced
+..\User\main.c(1725): warning:  #177-D: variable "sine_B" was declared but never referenced
+..\User\main.c(1726): warning:  #177-D: variable "sine_C" was declared but never referenced
+..\User\main.c(2967): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3106): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3250): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3512): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3644): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3775): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(2688): warning:  #177-D: variable "s" was declared but never referenced
+..\User\main.c(2689): warning:  #550-D: variable "status" was set but never used
+..\User\main.c(2712): warning:  #550-D: variable "wugongkvar_95" was set but never used
+..\User\main.c(5605): warning:  #177-D: variable "warning_flag" was declared but never referenced
+linking...
+Program Size: Code=48840 RO-data=27000 RW-data=384 ZI-data=50104  
+FromELF: creating hex file...
+".\Out\Project.axf" - 0 Error(s), 14 Warning(s).
+Build target 'Target 1'
+compiling main.c...
+..\User\main.c(1724): warning:  #177-D: variable "sine_A" was declared but never referenced
+..\User\main.c(1725): warning:  #177-D: variable "sine_B" was declared but never referenced
+..\User\main.c(1726): warning:  #177-D: variable "sine_C" was declared but never referenced
+..\User\main.c(2967): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3106): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3250): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3512): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3644): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3775): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(2688): warning:  #177-D: variable "s" was declared but never referenced
+..\User\main.c(2689): warning:  #550-D: variable "status" was set but never used
+..\User\main.c(2712): warning:  #550-D: variable "wugongkvar_95" was set but never used
+..\User\main.c(5605): warning:  #177-D: variable "warning_flag" was declared but never referenced
+linking...
+Program Size: Code=48840 RO-data=27000 RW-data=384 ZI-data=50104  
+FromELF: creating hex file...
+".\Out\Project.axf" - 0 Error(s), 13 Warning(s).
+Build target 'Target 1'
+compiling main.c...
+..\User\main.c(1724): warning:  #177-D: variable "sine_A" was declared but never referenced
+..\User\main.c(1725): warning:  #177-D: variable "sine_B" was declared but never referenced
+..\User\main.c(1726): warning:  #177-D: variable "sine_C" was declared but never referenced
+..\User\main.c(2967): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3106): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3250): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3512): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3644): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(3775): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+..\User\main.c(2688): warning:  #177-D: variable "s" was declared but never referenced
+..\User\main.c(2689): warning:  #550-D: variable "status" was set but never used
+..\User\main.c(2712): warning:  #550-D: variable "wugongkvar_95" was set but never used
+..\User\main.c(5605): warning:  #177-D: variable "warning_flag" was declared but never referenced
+linking...
+Program Size: Code=48840 RO-data=27000 RW-data=384 ZI-data=50104  
+FromELF: creating hex file...
+".\Out\Project.axf" - 0 Error(s), 13 Warning(s).
+Build target 'Target 1'
+compiling key.c...
+linking...
+Program Size: Code=48840 RO-data=27000 RW-data=380 ZI-data=50108  
+FromELF: creating hex file...
+".\Out\Project.axf" - 0 Error(s), 0 Warning(s).
