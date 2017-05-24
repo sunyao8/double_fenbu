@@ -74,7 +74,7 @@ OS_STK urgent_TASK_STK[urgent_STK_SIZE];
 { 
   u8 dis_comm;//dis=0 comm=1
   u8 myid[3];      //本电容箱ID号
-  u8 size[3];      //容量单位千法
+  u8 size[1];      //容量单位千法
   u8 work_status[3];    //工作状态 1 为投入工作；0 为没有工作
 }status_dis_node;
 
