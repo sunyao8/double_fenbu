@@ -1612,7 +1612,7 @@ if(((RS485_RX_CNT==7)&&(RS485_RX_BUF[5]==CONTROL)))
 		if(RS485_RX_BUF[RS485_RX_CNT-1]==')')
 	{
  	
-				if((RS485_RX_BUF[1]=='(')&&(RS485_RX_CNT==10))
+				if((RS485_RX_BUF[1]=='(')&&(RS485_RX_CNT==13))
 					{
 
 /*		if(mybox.myid>RS485_RX_BUF[2])
@@ -2705,9 +2705,11 @@ return 1;
 	rs485buf[7]=mystatus->work_status[1];
 	rs485buf[8]=mystatus->work_status[2];
 
-
-	rs485buf[9]=')';
-	RS485_Send_Data(rs485buf,10);//发送10个字节
+       rs485buf[9]=dianliuzhi_C_A;
+       rs485buf[10]=dianliuzhi_C_B;
+       rs485buf[11]=dianliuzhi_C_C;
+	rs485buf[12]=')';
+	RS485_Send_Data(rs485buf,13);//发送10个字节
 }
 /**************/
  void rs485_trans_status_dis(u8 count,u8 *tx_r485,status_dis_node *dis_list,status_comm_node *comm_list)//主机程序，主机命令解析成RS485信息，发送给目的从机
